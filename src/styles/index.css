@@ -1,0 +1,136 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #04040c;
+  color: rgba(255,255,255,0.92);
+  font-family: system-ui, -apple-system, "Inter", sans-serif;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* Premium scrollbars */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(123,92,230,0.3);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(123,92,230,0.5);
+}
+
+/* Selection */
+::selection {
+  background: rgba(123,92,230,0.4);
+  color: #fff;
+}
+
+/* Animations */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes pulse-scale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes loading-bar {
+  0% { width: 0; }
+  100% { width: 100%; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(123,92,230,0.2); }
+  50% { box-shadow: 0 0 20px rgba(123,92,230,0.4); }
+}
+
+@keyframes audio-bar-1 {
+  0%, 100% { height: 3px; }
+  50% { height: 12px; }
+}
+@keyframes audio-bar-2 {
+  0%, 100% { height: 6px; }
+  50% { height: 16px; }
+}
+@keyframes audio-bar-3 {
+  0%, 100% { height: 4px; }
+  50% { height: 10px; }
+}
+
+/* Interactive elements */
+button, a, [role="button"] {
+  cursor: pointer;
+  user-select: none;
+}
+
+input, textarea {
+  cursor: text;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 1px solid rgba(123,92,230,0.5);
+  outline-offset: 2px;
+}
+
+/* Range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  height: 4px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #7B5CE6;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 6px rgba(123,92,230,0.4);
+}
+
+/* Responsive — smaller screens */
+@media (max-width: 1280px) {
+  .shift-sidebar {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .shift-minimap {
+    display: none !important;
+  }
+}
