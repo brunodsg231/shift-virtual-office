@@ -7,7 +7,7 @@ import { Server } from 'socket.io'
 import cors from 'cors'
 import { handleTask } from './agents/orchestrator.js'
 import { AssignTaskPayload } from './types/index.js'
-import { initSupabase, getTasks, getRecentActivity, getAgentMemoryRaw, deleteAgentMemory, createTask, getTodayStandupReports, getStandupHistory } from './db/supabase.js'
+import { initSupabase, initTables, getTasks, getRecentActivity, getAgentMemoryRaw, deleteAgentMemory, createTask, getTodayStandupReports, getStandupHistory } from './db/supabase.js'
 import { mcpManager } from './mcp/mcpClient.js'
 import { agentRegistry } from './agents/registry.js'
 import { runStandup, initStandupScheduler, isStandupRunning, getStandupStatus } from './standup/scheduler.js'
@@ -204,8 +204,9 @@ async function startup() {
     })
   })
 
-  // 2. Supabase
+  // 2. Database
   const supabaseOk = initSupabase()
+  if (supabaseOk) await initTables()
 
   // 3. Anthropic check
   const anthropicOk = !!process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY !== 'your_key_here'
