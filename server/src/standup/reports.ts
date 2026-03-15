@@ -102,7 +102,7 @@ export async function generateBrunoSummary(socket: Server): Promise<string> {
     let summary = ''
 
     const stream = client.messages.stream({
-      model: 'claude-3-5-sonnet-latest',
+      model: 'claude-sonnet-4-5-latest',
       max_tokens: 120,
       system: BRUNO_SUMMARY_PROMPT,
       messages: [
