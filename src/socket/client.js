@@ -57,6 +57,8 @@ socket.on('agent_done', ({ agentId, fullResponse }) => {
   useStore.getState().clearToolCall(agentId)
   useStore.getState().clearStreamingToken(agentId)
   useStore.getState().setAgentMessage(agentId, fullResponse)
+  // Save response to task history so it persists in agent detail
+  useStore.getState().saveAgentResponse(agentId, fullResponse)
 })
 
 // ─── Error ───────────────────────────────────────
@@ -118,6 +120,10 @@ socket.on('agent_report', ({ from, to, result }) => {
 
 socket.on('activity_update', (activity) => {
   useStore.getState().addActivity(activity)
+  // Auto-open activity feed on first activity
+  if (!useStore.getState().activityFeedOpen && useStore.getState().activities.length === 0) {
+    useStore.getState().toggleActivityFeed()
+  }
 })
 
 socket.on('task_update', (task) => {

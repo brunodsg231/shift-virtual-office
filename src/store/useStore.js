@@ -106,6 +106,21 @@ const useStore = create((set, get) => ({
       },
     })),
 
+  // Save agent response to the most recent task in history
+  saveAgentResponse: (agentId, response) =>
+    set((state) => {
+      const agent = state.agents[agentId]
+      if (!agent || !agent.taskHistory.length) return state
+      const tasks = [...agent.taskHistory]
+      tasks[tasks.length - 1] = { ...tasks[tasks.length - 1], response }
+      return {
+        agents: {
+          ...state.agents,
+          [agentId]: { ...agent, taskHistory: tasks },
+        },
+      }
+    }),
+
   // ─── Streaming ─────────────────────────────────
 
   appendToken: (agentId, token) =>

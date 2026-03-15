@@ -133,12 +133,15 @@ export async function handleTask(
   // 2b. Track agent status
   agentStatuses[agentId] = { status: 'working', currentTask: task.slice(0, 80), timestamp: Date.now() }
 
-  // 3. Log task received
+  // 3. Log task received — always emit event even without Supabase
   const actEntry = await logActivity(agentId, 'task_received', task)
-  if (actEntry) socket.emit('activity_update', actEntry)
+  socket.emit('activity_update', actEntry || {
+    id: crypto.randomUUID(), agent_id: agentId, action_type: 'task_received',
+    description: task, created_at: new Date().toISOString(),
+  })
   socket.emit('agent_status', { agentId, status: 'thinking' })
 
-  // 4. Create task record
+  // 4. Create task record — always emit even without Supabase
   const taskRecord = await createTask({
     assigned_to: agentId,
     assigned_by: delegatedFrom || 'user',
@@ -146,7 +149,13 @@ export async function handleTask(
     description: task,
     status: 'in_progress',
   })
-  if (taskRecord) socket.emit('task_update', taskRecord)
+  const taskId = taskRecord?.id || crypto.randomUUID()
+  const localTask = taskRecord || {
+    id: taskId, assigned_to: agentId, assigned_by: delegatedFrom || 'user',
+    title: task.slice(0, 80), description: task, status: 'in_progress',
+    created_at: new Date().toISOString(),
+  }
+  socket.emit('task_update', localTask)
 
   const toolsCalled: string[] = []
   let turns = 0
@@ -227,7 +236,11 @@ export async function handleTask(
         'delegated',
         `Delegated to ${delegation.agentId}: ${delegation.task}`
       )
-      if (delEntry) socket.emit('activity_update', delEntry)
+      socket.emit('activity_update', delEntry || {
+        id: crypto.randomUUID(), agent_id: agentId, action_type: 'delegated',
+        description: `Delegated to ${delegation.agentId}: ${delegation.task}`,
+        created_at: new Date().toISOString(),
+      })
 
       setTimeout(() => {
         handleTask(
@@ -243,23 +256,22 @@ export async function handleTask(
     await saveMemoryEntry(agentId, 'user', task)
     await saveMemoryEntry(agentId, 'assistant', fullResponse)
 
-    // 8. Update task status
+    // 8. Update task status — always emit
     if (taskRecord) {
       await updateTaskStatus(taskRecord.id, 'done', fullResponse)
-      socket.emit('task_update', {
-        ...taskRecord,
-        status: 'done',
-        result: fullResponse,
-        completed_at: new Date().toISOString(),
-      })
     }
+    socket.emit('task_update', {
+      ...localTask,
+      status: 'done',
+      result: fullResponse,
+      completed_at: new Date().toISOString(),
+    })
 
-    const compEntry = await logActivity(
-      agentId,
-      'completed',
-      `Completed: ${task.slice(0, 60)}`
-    )
-    if (compEntry) socket.emit('activity_update', compEntry)
+    const compEntry = await logActivity(agentId, 'completed', `Completed: ${task.slice(0, 60)}`)
+    socket.emit('activity_update', compEntry || {
+      id: crypto.randomUUID(), agent_id: agentId, action_type: 'completed',
+      description: `Completed: ${task.slice(0, 60)}`, created_at: new Date().toISOString(),
+    })
 
     // 9. Report back if delegated
     if (delegatedFrom) {

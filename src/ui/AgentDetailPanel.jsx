@@ -52,6 +52,7 @@ function StatusBadge({ status }) {
 }
 
 function TaskItem({ task }) {
+  const [expanded, setExpanded] = useState(false)
   const elapsed = Date.now() - task.timestamp
   const timeStr = elapsed < 60000
     ? 'just now'
@@ -60,28 +61,60 @@ function TaskItem({ task }) {
       : `${Math.floor(elapsed / 3600000)}h ago`
 
   return (
-    <div style={{
-      padding: '10px 12px',
-      background: 'rgba(255,255,255,0.02)',
-      borderRadius: 8,
-      border: '1px solid rgba(255,255,255,0.04)',
-    }}>
+    <div
+      onClick={() => task.response && setExpanded(!expanded)}
+      style={{
+        padding: '10px 12px',
+        background: 'rgba(255,255,255,0.02)',
+        borderRadius: 8,
+        border: '1px solid rgba(255,255,255,0.04)',
+        cursor: task.response ? 'pointer' : 'default',
+      }}
+    >
       <div style={{
-        fontFamily: tokens.fontUI,
-        fontSize: 12,
-        color: tokens.textPrimary,
-        lineHeight: 1.4,
-        marginBottom: 4,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
-        {task.text}
+        <div style={{
+          fontFamily: tokens.fontUI,
+          fontSize: 12,
+          color: tokens.textPrimary,
+          lineHeight: 1.4,
+          flex: 1,
+        }}>
+          {task.text}
+        </div>
+        {task.response && (
+          <span style={{ fontSize: 10, color: tokens.textDim, marginLeft: 8, flexShrink: 0 }}>
+            {expanded ? '\u25B2' : '\u25BC'}
+          </span>
+        )}
       </div>
       <div style={{
         fontFamily: tokens.fontMono,
         fontSize: 9,
         color: tokens.textDim,
+        marginTop: 2,
       }}>
         {timeStr}
       </div>
+      {expanded && task.response && (
+        <div style={{
+          marginTop: 8,
+          padding: '10px 12px',
+          background: 'rgba(255,255,255,0.03)',
+          borderRadius: 6,
+          borderLeft: '2px solid rgba(123,92,230,0.4)',
+          fontFamily: tokens.fontUI,
+          fontSize: 12,
+          color: tokens.textSecondary,
+          lineHeight: 1.5,
+          maxHeight: 200,
+          overflowY: 'auto',
+          whiteSpace: 'pre-wrap',
+        }}>
+          {task.response}
+        </div>
+      )}
     </div>
   )
 }
