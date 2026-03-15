@@ -6,7 +6,10 @@ import useStore from '../store/useStore'
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001'
 
 function formatDate(dateStr) {
-  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
+  if (!dateStr) return 'Unknown date'
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return dateStr
+  return d.toLocaleDateString('en-US', {
     weekday: 'long', month: 'short', day: 'numeric', year: 'numeric',
   })
 }
@@ -125,7 +128,7 @@ function SessionBlock({ session, agents, summary, isLast, defaultOpen }) {
           background: tokens.accent, boxShadow: `0 0 6px ${tokens.accent}`,
         }} />
         <span style={{ fontFamily: tokens.fontUI, fontSize: 13, fontWeight: 600, color: tokens.textPrimary }}>
-          Standup at {formatTime(session.time)}
+          Standup — {new Date(session.time).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {formatTime(session.time)}
         </span>
         <span style={{ fontFamily: tokens.fontMono, fontSize: 10, color: tokens.textDim }}>
           {session.reports.length} reports
