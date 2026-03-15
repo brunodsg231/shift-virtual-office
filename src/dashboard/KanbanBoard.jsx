@@ -250,14 +250,28 @@ function Column({ column, tasks }) {
   )
 }
 
+// Demo tasks shown when the board is empty so the user can see the layout
+const DEMO_TASKS = [
+  { id: 'demo-1', assigned_to: 'kim', title: 'Follow up with Acme Corp on venue booking', status: 'pending', created_at: new Date(Date.now() - 3600000).toISOString(), _demo: true },
+  { id: 'demo-2', assigned_to: 'marco', title: 'Send proposal to TechFlow for Q2 event', status: 'pending', created_at: new Date(Date.now() - 7200000).toISOString(), _demo: true },
+  { id: 'demo-3', assigned_to: 'zara', title: 'Draft social media campaign for March', status: 'in_progress', created_at: new Date(Date.now() - 1800000).toISOString(), _demo: true },
+  { id: 'demo-4', assigned_to: 'dev', title: 'Fix monitor streaming on 3D office view', status: 'in_progress', created_at: new Date(Date.now() - 900000).toISOString(), _demo: true },
+  { id: 'demo-5', assigned_to: 'riley', title: 'Test projector alignment for Saturday event', status: 'done', created_at: new Date(Date.now() - 86400000).toISOString(), completed_at: new Date(Date.now() - 82800000).toISOString(), result: 'All 17 projectors calibrated and aligned. MadMapper scenes tested.', _demo: true },
+  { id: 'demo-6', assigned_to: 'petra', title: 'Reconcile February invoices', status: 'done', created_at: new Date(Date.now() - 172800000).toISOString(), completed_at: new Date(Date.now() - 169200000).toISOString(), result: 'All invoices reconciled. $800 variance found in tech spending.', _demo: true },
+]
+
 export default function KanbanBoard() {
   const taskBoard = useStore((s) => s.taskBoard)
   const boardFilter = useStore((s) => s.boardFilter)
 
+  // Show demo tasks when board is empty
+  const showDemo = taskBoard.length === 0
+  const source = showDemo ? DEMO_TASKS : taskBoard
+
   const filtered = useMemo(() => {
-    if (!boardFilter) return taskBoard
-    return taskBoard.filter((t) => t.assigned_to === boardFilter)
-  }, [taskBoard, boardFilter])
+    if (!boardFilter) return source
+    return source.filter((t) => t.assigned_to === boardFilter)
+  }, [source, boardFilter])
 
   const grouped = useMemo(() => {
     const result = {}
@@ -270,20 +284,45 @@ export default function KanbanBoard() {
   return (
     <div style={{
       display: 'flex',
-      flexDirection: 'row',
-      gap: 16,
-      padding: 20,
+      flexDirection: 'column',
       height: '100%',
       minHeight: '100%',
       boxSizing: 'border-box',
     }}>
-      {COLUMNS.map((col) => (
-        <Column
-          key={col.key}
-          column={col}
-          tasks={grouped[col.key]}
-        />
-      ))}
+      {showDemo && (
+        <div style={{
+          margin: '20px 20px 0',
+          padding: '8px 16px',
+          background: 'rgba(123,92,230,0.08)',
+          border: '1px solid rgba(123,92,230,0.2)',
+          borderRadius: 8,
+          fontFamily: tokens.fontUI,
+          fontSize: 12,
+          color: tokens.accent,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}>
+          <span style={{ fontSize: 14 }}>&#9672;</span>
+          Demo mode — these are example tasks. Assign a real task to get started. They'll disappear once you do.
+        </div>
+      )}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'row',
+        gap: 16,
+        padding: 20,
+        flex: 1,
+        minHeight: 0,
+      }}>
+        {COLUMNS.map((col) => (
+          <Column
+            key={col.key}
+            column={col}
+            tasks={grouped[col.key]}
+          />
+        ))}
+      </div>
     </div>
   )
 }
