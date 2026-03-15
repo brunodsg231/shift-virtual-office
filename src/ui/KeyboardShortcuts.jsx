@@ -12,6 +12,8 @@ const SHORTCUTS = [
   { key: '1-9, 0', label: 'Select agent (Kim=1 ... Bruno=0)' },
   { key: 'Space', label: 'Select Bruno' },
   { key: 'S', label: 'Trigger standup' },
+  { key: 'T', label: 'Toggle task board' },
+  { key: 'A', label: 'Toggle activity feed' },
   { key: 'Escape', label: 'Close panels / deselect' },
   { key: '?', label: 'Toggle this panel' },
 ]
@@ -48,6 +50,20 @@ export default function KeyboardShortcuts() {
         e.preventDefault()
         const url = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001'
         fetch(`${url}/api/standup/run`, { method: 'POST' }).catch(() => {})
+        return
+      }
+
+      // T — toggle task board
+      if (e.key === 't' || e.key === 'T') {
+        e.preventDefault()
+        toggleTaskBoard()
+        return
+      }
+
+      // A — toggle activity feed
+      if (e.key === 'a' || e.key === 'A') {
+        e.preventDefault()
+        toggleActivityFeed()
         return
       }
 

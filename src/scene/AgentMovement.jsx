@@ -16,6 +16,20 @@ const HOME = {
   bruno: [  0, 0,  1.2],
 }
 
+// Conference table positions — where agents stand during standup
+const CONFERENCE_SPOTS = {
+  kim:   [ 10, 0,  3],
+  dev:   [ 12, 0,  3],
+  marco: [ 14, 0,  3],
+  zara:  [ 16, 0,  3],
+  sam:   [ 18, 0,  3],
+  petra: [ 10, 0,  7],
+  lex:   [ 12, 0,  7],
+  riley: [ 14, 0,  7],
+  dante: [ 16, 0,  7],
+  bruno: [ 14, 0,  5],  // Head of table
+}
+
 // Furniture bounding boxes — agents cannot walk through these
 const BLOCKED_ZONES = [
   // Row 1 desks at z=-6 (desk ±1.0 X, ±0.5 Z, plus chair clearance)
@@ -90,15 +104,44 @@ function randomDelay() {
 export default function AgentMovement() {
   const timersRef = useRef({})
   const stateRef = useRef({})
+  const prevStandupRef = useRef(false)
 
   useFrame(() => {
-    const { agents } = useStore.getState()
+    const { agents, standupActive } = useStore.getState()
     const now = Date.now()
+
+    // Standup transition: move agents to/from conference table
+    if (standupActive && !prevStandupRef.current) {
+      // Standup just started — move everyone to conference table
+      Object.keys(agents).forEach((id) => {
+        const spot = CONFERENCE_SPOTS[id]
+        if (spot) {
+          useStore.getState().setAgentPosition(id, spot)
+          stateRef.current[id] = 'standup'
+        }
+      })
+      prevStandupRef.current = true
+      return
+    }
+
+    if (!standupActive && prevStandupRef.current) {
+      // Standup just ended — send everyone home
+      Object.keys(agents).forEach((id) => {
+        useStore.getState().setAgentPosition(id, HOME[id])
+        stateRef.current[id] = 'returning'
+        timersRef.current[id] = now + 5000
+      })
+      prevStandupRef.current = false
+      return
+    }
+
+    // During standup, don't do normal movement
+    if (standupActive) return
 
     Object.keys(agents).forEach((id) => {
       const agent = agents[id]
 
-      // Don't move agents that are busy
+      // Don't move agents that are busy — send them home
       if (agent.status !== 'idle') {
         if (stateRef.current[id] === 'wandering') {
           stateRef.current[id] = 'returning'
@@ -120,13 +163,11 @@ export default function AgentMovement() {
       const currentState = stateRef.current[id] || 'home'
 
       if (currentState === 'home') {
-        // Go wander somewhere
         const spot = randomSpot()
         useStore.getState().setAgentPosition(id, spot)
         stateRef.current[id] = 'wandering'
         timersRef.current[id] = now + 5000 + Math.random() * 10000
       } else if (currentState === 'wandering') {
-        // Sometimes wander to another spot, sometimes go home
         if (Math.random() < 0.35) {
           const spot = randomSpot()
           useStore.getState().setAgentPosition(id, spot)
