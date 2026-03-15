@@ -165,7 +165,7 @@ export default function TopBar() {
 
   const navigate = useNavigate()
   const location = useLocation()
-  const isDashboard = location.hash === '' || location.hash === '#/' || location.hash === '#'
+  const isDashboard = location.pathname === '/' || location.pathname === ''
   const isOnline = connectedCount > 0
   const isMobile = useIsMobile()
 
