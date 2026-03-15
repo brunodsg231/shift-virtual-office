@@ -47,6 +47,29 @@ function NavButton({ item, isActive, onClick }) {
   )
 }
 
+function ClearFilterButton() {
+  const boardFilter = useStore((s) => s.boardFilter)
+  const setBoardFilter = useStore((s) => s.setBoardFilter)
+  if (!boardFilter) return null
+  return (
+    <button
+      onClick={() => setBoardFilter(null)}
+      style={{
+        background: 'rgba(123,92,230,0.15)',
+        border: '1px solid rgba(123,92,230,0.3)',
+        borderRadius: 4,
+        padding: '2px 8px',
+        fontFamily: tokens.fontMono,
+        fontSize: 9,
+        color: tokens.accent,
+        cursor: 'pointer',
+      }}
+    >
+      Show All
+    </button>
+  )
+}
+
 const AgentRow = memo(function AgentRow({ agentId }) {
   const agent = useStore((s) => s.agents[agentId])
   const activeAgent = useStore((s) => s.activeAgent)
@@ -66,7 +89,9 @@ const AgentRow = memo(function AgentRow({ agentId }) {
 
   const handleClick = () => {
     setActiveAgent(agentId)
-    setBoardFilter(agentId)
+    // Toggle filter: click again to clear
+    const currentFilter = useStore.getState().boardFilter
+    setBoardFilter(currentFilter === agentId ? null : agentId)
   }
 
   return (
@@ -219,15 +244,22 @@ export default function Sidebar() {
         <div
           style={{
             padding: '0 14px 8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span style={{
             fontFamily: tokens.fontMono,
             fontSize: 10,
             fontWeight: 600,
             color: tokens.textDim,
             textTransform: 'uppercase',
             letterSpacing: '0.08em',
-          }}
-        >
-          Agents
+          }}>
+            Agents
+          </span>
+          <ClearFilterButton />
         </div>
         {AGENT_IDS.map((id) => (
           <AgentRow key={id} agentId={id} />
