@@ -25,6 +25,9 @@ const io = new Server(server, {
 app.use(cors())
 app.use(express.json())
 
+// Suppress favicon 404
+app.get('/favicon.ico', (_req, res) => res.status(204).end())
+
 // ─── Heartbeat tracking (in-memory) ─────────────────
 
 const heartbeats: Record<string, { status: string; currentTask?: string; timestamp: number }> = {}
