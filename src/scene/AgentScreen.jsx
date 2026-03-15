@@ -471,6 +471,91 @@ const drawFunctions = {
   },
 }
 
+// Live terminal view — shows streaming agent output
+function drawLiveTerminal(ctx, t, agent, agentId) {
+  const colors = {
+    kim: '#7B5CE6', dev: '#00BCD4', marco: '#FF6B35', zara: '#F59E0B',
+    riley: '#22C55E', dante: '#EC4899', sam: '#94A3B8', petra: '#EAB308',
+    lex: '#6366F1', bruno: '#FF0040',
+  }
+  const color = colors[agentId] || '#3B82F6'
+
+  // Background
+  ctx.fillStyle = '#0a0a14'
+  ctx.fillRect(0, 0, 1024, 640)
+
+  // Header bar
+  ctx.fillStyle = '#12121e'
+  ctx.fillRect(0, 0, 1024, 40)
+  ctx.fillStyle = color
+  ctx.fillRect(0, 38, 1024, 2)
+
+  // Status indicator
+  ctx.fillStyle = color
+  ctx.beginPath()
+  ctx.arc(20, 20, 5, 0, Math.PI * 2)
+  ctx.fill()
+
+  // Agent name + status
+  ctx.fillStyle = '#e8e8ff'
+  ctx.font = 'bold 14px monospace'
+  ctx.fillText(`${agent?.name || agentId} — ${(agent?.status || 'working').toUpperCase()}`, 36, 26)
+
+  // Timestamp
+  ctx.fillStyle = '#555'
+  ctx.font = '11px monospace'
+  const now = new Date()
+  ctx.fillText(now.toLocaleTimeString(), 880, 26)
+
+  // Terminal content — word-wrap the message
+  const message = agent?.currentMessage || ''
+  if (!message) {
+    // Thinking dots animation
+    ctx.fillStyle = '#555'
+    ctx.font = '16px monospace'
+    const dots = '.'.repeat(1 + Math.floor(t * 2) % 3)
+    ctx.fillText(`Processing${dots}`, 20, 80)
+    return
+  }
+
+  ctx.font = '13px monospace'
+  const maxCharsPerLine = 72
+  const lineHeight = 20
+  const startY = 62
+  const maxLines = 28
+
+  // Split into lines with word wrap
+  const words = message.split(/(\s+)/)
+  const lines = []
+  let currentLine = ''
+
+  for (const word of words) {
+    if ((currentLine + word).length > maxCharsPerLine) {
+      if (currentLine) lines.push(currentLine)
+      currentLine = word.trimStart()
+    } else {
+      currentLine += word
+    }
+  }
+  if (currentLine) lines.push(currentLine)
+
+  // Show last N lines (scroll to bottom)
+  const visibleLines = lines.slice(-maxLines)
+  visibleLines.forEach((line, i) => {
+    ctx.fillStyle = '#c8c8e0'
+    ctx.fillText(line, 20, startY + i * lineHeight)
+  })
+
+  // Blinking cursor at end
+  if (Math.sin(t * 4) > 0) {
+    const lastLine = visibleLines[visibleLines.length - 1] || ''
+    const cursorX = 20 + lastLine.length * 7.8
+    const cursorY = startY + (visibleLines.length - 1) * lineHeight - 12
+    ctx.fillStyle = color
+    ctx.fillRect(cursorX, cursorY, 8, 16)
+  }
+}
+
 // Monitor positions — matching where screens are in Furniture.jsx
 // Single monitor per desk
 const MONITOR_CONFIGS = {
@@ -508,16 +593,25 @@ function LiveScreen({ agentId, config }) {
 
   useFrame((state) => {
     const now = state.clock.elapsedTime
-    // Update every 5 seconds
-    if (now - lastDraw.current < 5.0) return
+    const agent = useStore.getState().agents[agentId]
+    const isActive = agent?.status && agent.status !== 'idle'
+
+    // When active: update every frame for smooth streaming. When idle: every 5 seconds.
+    if (!isActive && now - lastDraw.current < 5.0) return
+    if (isActive && now - lastDraw.current < 0.15) return
     lastDraw.current = now
 
-    const agent = useStore.getState().agents[agentId]
-    const drawFn = drawFunctions[agentId]
-    if (!drawFn) return
-
     const ctx = canvasRef.current.getContext('2d')
-    drawFn(ctx, now, agent)
+
+    if (isActive && agent?.currentMessage) {
+      drawLiveTerminal(ctx, now, agent, agentId)
+    } else if (isActive) {
+      drawLiveTerminal(ctx, now, agent, agentId)
+    } else {
+      const drawFn = drawFunctions[agentId]
+      if (drawFn) drawFn(ctx, now, agent)
+    }
+
     if (textureRef.current) textureRef.current.needsUpdate = true
   })
 

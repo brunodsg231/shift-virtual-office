@@ -211,6 +211,12 @@ export default memo(function AgentCharacter({ agentId }) {
 
   const initialPosSet = useRef(false)
 
+  // Desk-facing directions: agents face their monitors when sitting
+  const DESK_FACING = {
+    kim: Math.PI, dev: Math.PI, marco: Math.PI, zara: Math.PI, sam: Math.PI,
+    petra: 0, lex: 0, riley: 0, dante: 0, bruno: Math.PI,
+  }
+
   // Memoize toon materials (toon() itself caches, but useMemo avoids the lookup)
   const mats = useMemo(() => ({
     head: toon(lightenHex(skinTone, 0.15)),
@@ -327,7 +333,16 @@ export default memo(function AgentCharacter({ agentId }) {
       if (rightElbowRef.current) rightElbowRef.current.rotation.x = -0.2
 
     } else if (currentStatus === 'working') {
-      if (rootRef.current) rootRef.current.position.y = lerp(rootRef.current.position.y, 0, 3 * dt)
+      // Face the desk
+      const deskAngle = DESK_FACING[agentId] ?? Math.PI
+      let angleDiff = deskAngle - facingRef.current
+      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2
+      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2
+      facingRef.current += angleDiff * 4 * dt
+      groupRef.current.rotation.y = facingRef.current
+
+      // Sitting pose — lower body and bend legs
+      if (rootRef.current) rootRef.current.position.y = lerp(rootRef.current.position.y, -0.26, 3 * dt)
       if (hipsRef.current) hipsRef.current.rotation.z = lerp(hipsRef.current.rotation.z, 0, 3 * dt)
       if (torsoRef.current) torsoRef.current.rotation.x = lerp(torsoRef.current.rotation.x, -0.08, 3 * dt)
       if (headRef.current) {
@@ -339,10 +354,11 @@ export default memo(function AgentCharacter({ agentId }) {
       if (rightShoulderRef.current) rightShoulderRef.current.rotation.x = lerp(rightShoulderRef.current.rotation.x, -0.5, 3 * dt)
       if (leftElbowRef.current) leftElbowRef.current.rotation.x = -0.8 + Math.sin(t * typeSpeed + off) * 0.06
       if (rightElbowRef.current) rightElbowRef.current.rotation.x = -0.8 + Math.cos(t * typeSpeed + off + 1) * 0.06
-      if (leftHipJointRef.current) leftHipJointRef.current.rotation.x = lerp(leftHipJointRef.current.rotation.x, 0, 3 * dt)
-      if (rightHipJointRef.current) rightHipJointRef.current.rotation.x = lerp(rightHipJointRef.current.rotation.x, 0, 3 * dt)
-      if (leftKneeRef.current) leftKneeRef.current.rotation.x = lerp(leftKneeRef.current.rotation.x, 0, 3 * dt)
-      if (rightKneeRef.current) rightKneeRef.current.rotation.x = lerp(rightKneeRef.current.rotation.x, 0, 3 * dt)
+      // Legs bent — sitting in chair
+      if (leftHipJointRef.current) leftHipJointRef.current.rotation.x = lerp(leftHipJointRef.current.rotation.x, -1.5, 3 * dt)
+      if (rightHipJointRef.current) rightHipJointRef.current.rotation.x = lerp(rightHipJointRef.current.rotation.x, -1.5, 3 * dt)
+      if (leftKneeRef.current) leftKneeRef.current.rotation.x = lerp(leftKneeRef.current.rotation.x, 1.5, 3 * dt)
+      if (rightKneeRef.current) rightKneeRef.current.rotation.x = lerp(rightKneeRef.current.rotation.x, 1.5, 3 * dt)
 
     } else if (currentStatus === 'speaking') {
       const bounce = Math.abs(Math.sin(t * 4)) * 0.06
@@ -366,7 +382,16 @@ export default memo(function AgentCharacter({ agentId }) {
       if (rightKneeRef.current) rightKneeRef.current.rotation.x = lerp(rightKneeRef.current.rotation.x, 0, 3 * dt)
 
     } else if (currentStatus === 'thinking') {
-      if (rootRef.current) rootRef.current.position.y = lerp(rootRef.current.position.y, 0, 3 * dt)
+      // Face the desk
+      const deskAngle2 = DESK_FACING[agentId] ?? Math.PI
+      let angleDiff2 = deskAngle2 - facingRef.current
+      while (angleDiff2 > Math.PI) angleDiff2 -= Math.PI * 2
+      while (angleDiff2 < -Math.PI) angleDiff2 += Math.PI * 2
+      facingRef.current += angleDiff2 * 4 * dt
+      groupRef.current.rotation.y = facingRef.current
+
+      // Sitting pose
+      if (rootRef.current) rootRef.current.position.y = lerp(rootRef.current.position.y, -0.26, 3 * dt)
       if (torsoRef.current) torsoRef.current.rotation.x = lerp(torsoRef.current.rotation.x, 0, 3 * dt)
       if (headRef.current) {
         headRef.current.rotation.z = Math.sin(t * 0.6 + off) * 0.12
@@ -377,10 +402,11 @@ export default memo(function AgentCharacter({ agentId }) {
       if (leftShoulderRef.current) leftShoulderRef.current.rotation.x = lerp(leftShoulderRef.current.rotation.x, 0, 3 * dt)
       if (leftElbowRef.current) leftElbowRef.current.rotation.x = lerp(leftElbowRef.current.rotation.x, 0, 3 * dt)
       if (hipsRef.current) hipsRef.current.rotation.z = Math.sin(t * 0.4 + off) * 0.03
-      if (leftHipJointRef.current) leftHipJointRef.current.rotation.x = lerp(leftHipJointRef.current.rotation.x, 0, 3 * dt)
-      if (rightHipJointRef.current) rightHipJointRef.current.rotation.x = lerp(rightHipJointRef.current.rotation.x, 0, 3 * dt)
-      if (leftKneeRef.current) leftKneeRef.current.rotation.x = lerp(leftKneeRef.current.rotation.x, 0, 3 * dt)
-      if (rightKneeRef.current) rightKneeRef.current.rotation.x = lerp(rightKneeRef.current.rotation.x, 0, 3 * dt)
+      // Legs bent — sitting
+      if (leftHipJointRef.current) leftHipJointRef.current.rotation.x = lerp(leftHipJointRef.current.rotation.x, -1.5, 3 * dt)
+      if (rightHipJointRef.current) rightHipJointRef.current.rotation.x = lerp(rightHipJointRef.current.rotation.x, -1.5, 3 * dt)
+      if (leftKneeRef.current) leftKneeRef.current.rotation.x = lerp(leftKneeRef.current.rotation.x, 1.5, 3 * dt)
+      if (rightKneeRef.current) rightKneeRef.current.rotation.x = lerp(rightKneeRef.current.rotation.x, 1.5, 3 * dt)
 
     } else if (currentStatus === 'delegating') {
       if (rootRef.current) rootRef.current.position.y = lerp(rootRef.current.position.y, 0, 3 * dt)

@@ -167,7 +167,7 @@ export async function handleTask(
       const systemWithContext = `${agent.systemPrompt}\n\n${worldContext}`
 
       const streamOptions: any = {
-        model: 'claude-sonnet-4-5-latest',
+        model: 'claude-3-5-sonnet-latest',
         max_tokens: 1024,
         system: systemWithContext,
         messages,
