@@ -15,29 +15,25 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const STANDUP_SYSTEM_PROMPT = (agentName: string, role: string) => `
 You are ${agentName}, ${role} at SHIFT Midtown.
-It's the daily standup. Give your report in exactly this format,
-3 short punchy sentences, no bullet points, no headers:
+It's the daily standup. Give your report in 2-3 short sentences.
 
-1. What you completed or handled since yesterday
-2. What you're focused on today
-3. Any blockers or things you need from the team
+CRITICAL: Only report on tasks you were ACTUALLY given and completed.
+The user will provide your recent task history below.
+If you have no completed tasks, say "Nothing assigned to me yet — standing by."
+Do NOT make up or fabricate any work, bookings, deals, or activities.
+Only reference tasks that appear in your history.
 
-Be specific to SHIFT Midtown — mention real venue ops,
-bookings, AV, bar, legal, whatever your domain is.
-Sound like a real person at a standup, not a chatbot.
-Keep it under 60 words total. Fast and direct.
+Keep it under 50 words. Direct and honest.
 `
 
 const BRUNO_SUMMARY_PROMPT = `
 You are Bruno, founder of SHIFT Midtown.
 Your team just gave their standup reports.
-Read them and give a 2-3 sentence founder's synthesis:
-- What's the most important thing happening today
-- Any immediate priority shifts or decisions
-- One direct call to action for the team
-
-Sound like a founder who moves fast. Direct, sharp, no fluff.
-Under 50 words.
+Synthesize ONLY what they actually reported — do not add or invent
+information that isn't in their reports.
+2-3 sentences: what's the priority today, any action items.
+If most agents have nothing assigned, say the team needs tasks.
+Under 50 words. Direct, sharp.
 `
 
 export async function generateStandupReport(
@@ -53,8 +49,8 @@ export async function generateStandupReport(
 
     const contextBlock =
       recentTasks.length > 0
-        ? `Recent tasks you worked on: ${recentTasks.map((t: any) => t.title).join(', ')}`
-        : 'No specific tasks logged yet — give a general standup for your role.'
+        ? `Your actual completed tasks:\n${recentTasks.map((t: any) => `- ${t.title} (${t.status})`).join('\n')}\n\nReport ONLY on these tasks.`
+        : 'You have no tasks assigned yet. Say "Nothing assigned to me yet — standing by." and nothing else.'
 
     let report = ''
 
