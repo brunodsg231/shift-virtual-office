@@ -1,4 +1,5 @@
-import { Suspense, useMemo } from 'react'
+import { Suspense } from 'react'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, ContactShadows } from '@react-three/drei'
 import Room from './scene/Room'
@@ -30,9 +31,10 @@ import CommandPalette from './ui/CommandPalette'
 import AmbientSound from './ui/AmbientSound'
 import DeskPOVOverlay from './ui/DeskPOVOverlay'
 import LoadingScreen from './ui/LoadingScreen'
+import Dashboard from './dashboard/Dashboard'
 import useStore from './store/useStore'
 
-export default function App() {
+function OfficeView() {
   const cameraMode = useStore((s) => s.cameraMode)
   const isDesk = cameraMode === 'desk'
   return (
@@ -96,22 +98,33 @@ export default function App() {
         <CameraIntro />
         <PostFX />
       </Canvas>
-      <TopBar />
       <ChatBar />
       <ActivityFeed />
       <TaskBoard />
       <StandupMode />
-      <NotificationSystem />
-      <KeyboardShortcuts />
       <AgentDetailPanel />
       <MiniMap />
       <SettingsPanel />
-      <ConnectionStatus />
       <AgentStatusDashboard />
-      <CommandPalette />
       <DeskPOVOverlay />
       <AmbientSound />
-      <LoadingScreen />
     </>
+  )
+}
+
+export default function App() {
+  return (
+    <HashRouter>
+      <TopBar />
+      <NotificationSystem />
+      <KeyboardShortcuts />
+      <ConnectionStatus />
+      <CommandPalette />
+      <LoadingScreen />
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/office" element={<OfficeView />} />
+      </Routes>
+    </HashRouter>
   )
 }

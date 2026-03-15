@@ -1,5 +1,6 @@
 import { useState, useEffect, memo } from 'react'
 import { motion } from 'framer-motion'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { tokens } from '../styles/tokens'
 import useStore from '../store/useStore'
 import { useIsMobile } from '../hooks/useMediaQuery'
@@ -162,6 +163,9 @@ export default function TopBar() {
     setStandupTriggering(false)
   }
 
+  const navigate = useNavigate()
+  const location = useLocation()
+  const isDashboard = location.hash === '' || location.hash === '#/' || location.hash === '#'
   const isOnline = connectedCount > 0
   const isMobile = useIsMobile()
 
@@ -230,6 +234,46 @@ export default function TopBar() {
           SHIFT
           <span style={{ color: tokens.accent, marginLeft: 3 }}>HQ</span>
         </span>
+      </div>
+
+      {/* Separator */}
+      <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.08)', flexShrink: 0 }} />
+
+      {/* View switcher */}
+      <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+        {[
+          { key: '/', label: 'Dashboard' },
+          { key: '/office', label: 'Office' },
+        ].map((v) => {
+          const isActive = v.key === '/' ? isDashboard : !isDashboard
+          return (
+            <button
+              key={v.key}
+              onClick={() => navigate(v.key)}
+              style={{
+                background: isActive ? 'rgba(123,92,230,0.15)' : 'transparent',
+                border: 'none',
+                borderRadius: 6,
+                padding: '4px 10px',
+                fontFamily: tokens.fontMono,
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                color: isActive ? tokens.accent : tokens.textDim,
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) e.currentTarget.style.color = tokens.textPrimary
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) e.currentTarget.style.color = tokens.textDim
+              }}
+            >
+              {v.label}
+            </button>
+          )
+        })}
       </div>
 
       {/* Separator */}

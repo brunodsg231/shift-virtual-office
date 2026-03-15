@@ -31,6 +31,16 @@ const useStore = create((set, get) => ({
   // Task board items
   taskBoard: [],
 
+  // Board filter (agentId or null)
+  boardFilter: null,
+
+  // Selected task for detail panel
+  selectedTask: null,
+
+  // Dashboard navigation
+  dashboardNav: 'board', // 'board' | 'activity' | 'standups'
+  setDashboardNav: (nav) => set({ dashboardNav: nav }),
+
   // Sidebar states
   activityFeedOpen: false,
   taskBoardOpen: false,
@@ -209,6 +219,12 @@ const useStore = create((set, get) => ({
 
   toggleTaskBoard: () =>
     set((state) => ({ taskBoardOpen: !state.taskBoardOpen })),
+
+  setBoardFilter: (agentId) => set({ boardFilter: agentId }),
+
+  setSelectedTask: (task) => set({ selectedTask: task }),
+
+  clearSelectedTask: () => set({ selectedTask: null }),
 
   // ─── Standup ──────────────────────────────────────
 
