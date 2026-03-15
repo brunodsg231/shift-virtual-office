@@ -195,11 +195,11 @@ async function startup() {
   const s = (ok: boolean, labelTrue: string, labelFalse: string) =>
     ok ? `\u2705 ${labelTrue}` : `\u274C ${labelFalse}`
 
-  // 1. Start listening FIRST so Railway health checks pass
+  // 1. Start listening FIRST — bind to 0.0.0.0 so Railway's proxy can reach us
   const PORT = process.env.PORT || 3001
   await new Promise<void>((resolve) => {
-    server.listen(PORT, () => {
-      console.log(`\nSHIFT HQ listening on port ${PORT}`)
+    server.listen(Number(PORT), '0.0.0.0', () => {
+      console.log(`\nSHIFT HQ listening on 0.0.0.0:${PORT}`)
       resolve()
     })
   })
