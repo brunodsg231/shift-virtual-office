@@ -106,16 +106,30 @@ const AgentRow = memo(function AgentRow({ agentId }) {
             boxShadow: isWorking ? `0 0 6px ${agent.color}` : 'none',
           }}
         />
-        <span
-          style={{
-            fontFamily: tokens.fontUI,
-            fontSize: 13,
-            fontWeight: isActive ? 600 : 400,
-            color: tokens.textPrimary,
-          }}
-        >
-          {agent.name}
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          <span
+            style={{
+              fontFamily: tokens.fontUI,
+              fontSize: 13,
+              fontWeight: isActive ? 600 : 400,
+              color: tokens.textPrimary,
+            }}
+          >
+            {agent.name}
+          </span>
+          <span
+            style={{
+              fontFamily: tokens.fontMono,
+              fontSize: 9,
+              color: tokens.textDim,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {agent.role}
+          </span>
+        </div>
         <span
           style={{
             marginLeft: 'auto',

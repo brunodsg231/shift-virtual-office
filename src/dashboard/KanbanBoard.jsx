@@ -231,13 +231,14 @@ function Column({ column, tasks }) {
 
         {tasks.length === 0 && !showForm ? (
           <div style={{
-            padding: '24px 12px',
+            padding: '32px 16px',
             textAlign: 'center',
             fontFamily: tokens.fontUI,
-            fontSize: 11,
+            fontSize: 12,
             color: tokens.textDim,
+            lineHeight: 1.5,
           }}>
-            No tasks
+            No tasks yet.{isBacklog ? ' Use the quick assign bar above to create one.' : ''}
           </div>
         ) : (
           tasks.map((task) => (

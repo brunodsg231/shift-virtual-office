@@ -109,6 +109,8 @@ export default function ActivityView() {
         flexDirection: 'column',
         height: '100%',
         background: tokens.void,
+        borderRadius: 12,
+        overflow: 'hidden',
       }}
     >
       {/* Filter bar */}
@@ -201,6 +203,8 @@ export default function ActivityView() {
           const agent = agents[activity.agent_id]
           const clickable = isClickable(activity.action_type)
           const isEven = index % 2 === 0
+          const isFirst = index === 0
+          const isLast = index === filteredActivities.length - 1
 
           return (
             <div
@@ -215,6 +219,7 @@ export default function ActivityView() {
                 cursor: clickable ? 'pointer' : 'default',
                 transition: 'background 0.15s',
                 borderLeft: clickable ? `2px solid transparent` : '2px solid transparent',
+                borderRadius: isFirst && isLast ? '12px' : isFirst ? '12px 12px 0 0' : isLast ? '0 0 12px 12px' : 0,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(255,255,255,0.04)'

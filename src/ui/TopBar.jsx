@@ -194,7 +194,7 @@ export default function TopBar() {
           gap: isMobile ? '8px' : '12px',
           height: isMobile ? '38px' : '44px',
           padding: isMobile ? '0 12px' : '0 18px',
-          maxWidth: isMobile ? '100%' : '720px',
+          maxWidth: isMobile ? '100%' : '880px',
           background: 'rgba(10,10,24,0.88)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255,255,255,0.08)',
