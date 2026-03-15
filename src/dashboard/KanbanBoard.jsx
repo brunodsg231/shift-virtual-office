@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { tokens } from '../styles/tokens'
 import useStore from '../store/useStore'
+import { useIsMobile } from '../hooks/useMediaQuery'
 import { assignTaskToAgent } from '../socket/client'
 import TaskCard from './TaskCard'
 
@@ -263,6 +264,8 @@ const DEMO_TASKS = [
 export default function KanbanBoard() {
   const taskBoard = useStore((s) => s.taskBoard)
   const boardFilter = useStore((s) => s.boardFilter)
+  const isMobile = useIsMobile()
+  const [mobileCol, setMobileCol] = useState('backlog')
 
   // Show demo tasks when board is empty
   const showDemo = taskBoard.length === 0
@@ -291,7 +294,7 @@ export default function KanbanBoard() {
     }}>
       {showDemo && (
         <div style={{
-          margin: '20px 20px 0',
+          margin: isMobile ? '12px 12px 0' : '20px 20px 0',
           padding: '8px 16px',
           background: 'rgba(123,92,230,0.08)',
           border: '1px solid rgba(123,92,230,0.2)',
@@ -303,25 +306,60 @@ export default function KanbanBoard() {
           alignItems: 'center',
           gap: 8,
         }}>
-          <span style={{ fontSize: 14 }}>&#9672;</span>
-          Demo mode — these are example tasks. Assign a real task to get started. They'll disappear once you do.
+          Demo mode — assign a real task to get started.
         </div>
       )}
+
+      {/* Mobile: column tabs */}
+      {isMobile && (
+        <div style={{
+          display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.06)',
+          padding: '8px 12px 0', gap: 4, flexShrink: 0,
+        }}>
+          {COLUMNS.map((col) => (
+            <button
+              key={col.key}
+              onClick={() => setMobileCol(col.key)}
+              style={{
+                flex: 1, padding: '8px 0',
+                background: mobileCol === col.key ? 'rgba(255,255,255,0.06)' : 'transparent',
+                border: 'none',
+                borderBottom: mobileCol === col.key ? `2px solid ${tokens.accent}` : '2px solid transparent',
+                borderRadius: '6px 6px 0 0',
+                fontFamily: tokens.fontUI, fontSize: 12, fontWeight: 600,
+                color: mobileCol === col.key ? tokens.textPrimary : tokens.textDim,
+                cursor: 'pointer',
+              }}
+            >
+              {col.label} ({grouped[col.key]?.length || 0})
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Desktop: 3 columns | Mobile: single column */}
       <div style={{
         display: 'flex',
-        flexDirection: 'row',
-        gap: 16,
-        padding: 20,
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? 0 : 16,
+        padding: isMobile ? 12 : 20,
         flex: 1,
         minHeight: 0,
       }}>
-        {COLUMNS.map((col) => (
+        {isMobile ? (
           <Column
-            key={col.key}
-            column={col}
-            tasks={grouped[col.key]}
+            column={COLUMNS.find(c => c.key === mobileCol)}
+            tasks={grouped[mobileCol] || []}
           />
-        ))}
+        ) : (
+          COLUMNS.map((col) => (
+            <Column
+              key={col.key}
+              column={col}
+              tasks={grouped[col.key]}
+            />
+          ))
+        )}
       </div>
     </div>
   )

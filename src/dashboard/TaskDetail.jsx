@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { tokens } from '../styles/tokens'
+import { useIsMobile } from '../hooks/useMediaQuery'
 import useStore from '../store/useStore'
 import { assignTaskToAgent } from '../socket/client'
 
@@ -39,6 +40,7 @@ export default function TaskDetail() {
   const clearSelectedTask = useStore((s) => s.clearSelectedTask)
   const [followUp, setFollowUp] = useState('')
   const conversationRef = useRef(null)
+  const isMobile = useIsMobile()
 
   const agent = selectedTask ? agents[selectedTask.assigned_to] : null
   const agentColor = agent?.color || tokens.textDim
@@ -105,7 +107,7 @@ export default function TaskDetail() {
               top: 0,
               right: 0,
               bottom: 0,
-              width: 480,
+              width: isMobile ? '100vw' : 480,
               zIndex: 1200,
               background: tokens.glass,
               backdropFilter: tokens.glassBlur,
